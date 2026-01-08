@@ -42,7 +42,7 @@
                 <div class="admin-actions">
                     <div class="admin-search-bar">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="searchInput" placeholder="Search by number or type...">
+                        <input type="text" id="searchInput" placeholder="Search by number..." onkeypress="if(event.key === 'Enter') performSearch()">
                     </div>
                     <a href="rooms-edit.html" class="btn" style="padding: 10px 20px; font-size: 0.9rem; background-color: #7b946f; border-color: #7b946f;">+ Add a Room</a>
                 </div>
@@ -72,8 +72,9 @@
             fetchRooms();
         });
 
-        function fetchRooms() {
-            fetch('api/rooms')
+        // 1. Fetch Rooms (handles both full list and search results)
+        function fetchRooms(url = 'api/rooms') {
+            fetch(url)
                 .then(res => {
                     if (!res.ok) throw new Error("HTTP error " + res.status);
                     return res.json();
@@ -82,16 +83,14 @@
                     const tbody = document.getElementById('rooms-tbody');
                     const countSpan = document.getElementById('room-count');
                     
-                    // Update dynamic count
-                    countSpan.innerText = data.length;
+                    // Convert single search object to array if necessary
+                    const rooms = Array.isArray(data) ? data : [data];
                     
-                    // Clear existing rows
+                    countSpan.innerText = rooms.length;
                     tbody.innerHTML = '';
 
-                    data.forEach(room => {
+                    rooms.forEach(room => {
                         const row = document.createElement('tr');
-                        
-                        // Apply status label styling dynamically
                         const statusClass = room.status.toLowerCase() === 'available' ? 'confirmed' : 'cancelled';
 
                         row.innerHTML = `
@@ -104,7 +103,7 @@
                                 <a href="rooms-edit.html?id=${room.id}" class="action-btn">
                                     <i class="fa-regular fa-pen-to-square"></i>
                                 </a>
-                                <span class="action-btn delete">
+                                <span class="action-btn delete" onclick="deleteRoom(${room.id})">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </span>
                             </td>
@@ -114,9 +113,37 @@
                 })
                 .catch(err => {
                     console.error("Fetch error:", err);
-                    document.getElementById('rooms-tbody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Failed to load rooms.</td></tr>`;
+                    document.getElementById('rooms-tbody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">No results found.</td></tr>`;
+                    document.getElementById('room-count').innerText = "0";
                 });
+        }
+
+        // 2. Perform Search
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query === "") {
+                fetchRooms(); // Reset to full list if empty
+            } else {
+                fetchRooms(`api/rooms/search?room_number=${query}`);
+            }
+        }
+
+        // 3. Delete Room
+        function deleteRoom(id) {
+            if (confirm(`Are you sure you want to delete Room ID: ${id}?`)) {
+                fetch(`api/rooms/delete?id=${id}`)
+                    .then(res => {
+                        if (res.ok) {
+                            alert("Room deleted successfully.");
+                            fetchRooms(); // Refresh the list
+                        } else {
+                            alert("Failed to delete room. It might be linked to existing bookings.");
+                        }
+                    })
+                    .catch(err => console.error("Delete error:", err));
+            }
         }
     </script>
 </body>
+
 </html>

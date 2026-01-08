@@ -35,7 +35,7 @@
                 <div class="admin-actions">
                     <div class="admin-search-bar">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="searchInput" placeholder="Search bookings...">
+                        <input type="text" id="searchInput" placeholder="Search by Room Number..." onkeypress="if(event.key === 'Enter') performSearch()">
                     </div>
                     <a href="bookings-edit.html" class="btn" style="padding: 10px 20px; background-color: #7b946f;">+ Add a Booking</a>
                 </div>
@@ -47,7 +47,7 @@
                         <tr>
                             <th>ID</th>
                             <th>User ID</th>
-                            <th>Room ID</th>
+                            <th>Room Number</th>
                             <th>Check-In</th>
                             <th>Check-Out</th>
                             <th>Price</th>
@@ -55,49 +55,67 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="bookings-tbody"></tbody>
+                    <tbody id="bookings-tbody">
+                        <tr><td colspan="8" style="text-align:center;">Loading bookings...</td></tr>
+                    </tbody>
                 </table>
             </div>
         </main>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', fetchBookings);
+        // Start fetching as soon as the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchBookings();
+        });
 
-        function fetchBookings() {
-            // Ensure this URL matches your Booking Servlet @WebServlet path
-            fetch('api/bookings')
+        /**
+         * 1. Fetch Bookings 
+         * Hits the servlet at 'api/bookings' or the search endpoint
+         */
+        function fetchBookings(url = 'api/bookings') {
+            console.log("Fetching from:", url);
+            
+            fetch(url)
                 .then(res => {
-                    if (!res.ok) throw new Error("HTTP error " + res.status);
+                    if (!res.ok) throw new Error("Server responded with status: " + res.status);
                     return res.json();
                 })
                 .then(data => {
                     const tbody = document.getElementById('bookings-tbody');
-                    document.getElementById('booking-count').innerText = data.length;
+                    const countSpan = document.getElementById('booking-count');
                     
+                    countSpan.innerText = data.length;
                     tbody.innerHTML = '';
+
+                    if (data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No bookings found.</td></tr>`;
+                        return;
+                    }
 
                     data.forEach(booking => {
                         const row = document.createElement('tr');
                         
-                        // Map status to your CSS classes (confirmed, pending, cancelled)
+                        // Status badge logic
                         let statusClass = 'pending';
-                        if(booking.status.toLowerCase() === 'paid') statusClass = 'confirmed';
-                        if(booking.status.toLowerCase() === 'failed') statusClass = 'cancelled';
+                        const status = booking.status ? booking.status.toLowerCase() : 'pending';
+                        if (status === 'paid' || status === 'confirmed') statusClass = 'confirmed';
+                        if (status === 'failed' || status === 'cancelled') statusClass = 'cancelled';
 
+                        // Ensure these keys match your Servlet's JSON output
                         row.innerHTML = `
                             <td>${booking.id}</td>
                             <td>${booking.user_id}</td>
-                            <td>${booking.room_id}</td>
+                            <td>${booking.room_number}</td>
                             <td>${booking.check_in}</td>
                             <td>${booking.check_out}</td>
                             <td>$${booking.total_price}</td>
                             <td><span class="status-label ${statusClass}">${booking.status}</span></td>
                             <td>
-                                <a href="bookings-edit.html?id=${booking.id}" class="action-btn">
+                                <a href="bookings-edit.html?id=${booking.id}" class="action-btn" title="Edit">
                                     <i class="fa-regular fa-pen-to-square"></i>
                                 </a>
-                                <span class="action-btn delete">
+                                <span class="action-btn delete" onclick="deleteBooking(${booking.id})" title="Delete">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </span>
                             </td>
@@ -106,12 +124,41 @@
                     });
                 })
                 .catch(err => {
-                    console.error("Fetch error:", err);
-                    document.getElementById('bookings-tbody').innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">Failed to load bookings.</td></tr>`;
+                    console.error("Fetch Error:", err);
+                    document.getElementById('bookings-tbody').innerHTML = 
+                        `<tr><td colspan="8" style="text-align:center; color:red;">
+                            Failed to load bookings. Please check the console (F12).
+                        </td></tr>`;
                 });
         }
 
-        
+        /**
+         * 2. Search Functionality
+         */
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            // If empty, fetch list. If not, use search servlet.
+            const url = query ? `api/bookings/search?room_number=${encodeURIComponent(query)}` : 'api/bookings';
+            fetchBookings(url);
+        }
+
+        /**
+         * 3. Delete Functionality
+         */
+        function deleteBooking(id) {
+            if (confirm(`Are you sure you want to delete Booking #${id}?`)) {
+                fetch(`api/bookings/delete?id=${id}`)
+                    .then(res => {
+                        if (res.ok) {
+                            alert("Booking deleted successfully.");
+                            fetchBookings(); // Refresh the list automatically
+                        } else {
+                            alert("Error: Record could not be deleted.");
+                        }
+                    })
+                    .catch(err => console.error("Delete error:", err));
+            }
+        }
     </script>
 </body>
 </html>

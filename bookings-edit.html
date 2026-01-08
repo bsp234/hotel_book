@@ -7,151 +7,167 @@
     <title>Gabon Hotel - Edit Booking</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-
     <div class="admin-container">
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-logo">
                 <h2>GABON</h2>
                 <span>HOTEL</span>
             </div>
-
             <div class="sidebar-menu">
-                <div class="menu-item" onclick="window.location.href='dashboard.html'"><i
-                        class="fa-solid fa-shapes"></i> <span>Dashboard</span></div>
-
+                <div class="menu-item" onclick="window.location.href='dashboard.html'"><i class="fa-solid fa-shapes"></i> <span>Dashboard</span></div>
                 <div class="menu-category">Rooms</div>
-                <div class="menu-item" onclick="window.location.href='rooms-list.html'"><i class="fa-solid fa-bed"></i>
-                    <span>Rooms</span></div>
-                <div class="menu-item"><i class="fa-solid fa-bell-concierge"></i> <span>Services</span></div>
-
+                <div class="menu-item" onclick="window.location.href='rooms-list.html'"><i class="fa-solid fa-bed"></i> <span>Rooms</span></div>
                 <div class="menu-category">Bookings</div>
-                <div class="menu-item active" onclick="window.location.href='bookings-list.html'"><i
-                        class="fa-solid fa-calendar-check"></i> <span>View Bookings</span></div>
-                <div class="menu-item" onclick="window.location.href='bookings-edit.html'"><i
-                        class="fa-solid fa-calendar-plus"></i> <span>Create A Booking</span></div>
-            </div>
-
-            <div class="sidebar-footer">
-                <span>Log Out</span>
+                <div class="menu-item active" onclick="window.location.href='bookings-list.html'"><i class="fa-solid fa-calendar-check"></i> <span>View Bookings</span></div>
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="admin-content">
             <div class="admin-header">
-                <h2>Edit Booking</h2>
-                <!-- Button in screenshot says + Add a Room, but logically should be + Add a Booking or similar. I'll stick to Add a Booking. -->
-                <button class="btn"
-                    style="padding: 10px 20px; font-size: 0.9rem; background-color: #7b946f; border-color: #7b946f;">+
-                    Add a Booking</button>
+                <h2>Edit Booking #<span id="booking-id-display"></span></h2>
+                <button class="btn" style="padding: 10px 20px; font-size: 0.9rem; background-color: #7b946f; border-color: #7b946f;" onclick="window.location.href='bookings-list.html'">
+                    <i class="fa-solid fa-arrow-left"></i> Back to List
+                </button>
             </div>
 
-            <form>
-                <!-- Basic Info -->
+            <form id="editBookingForm">
+                <input type="hidden" id="bookingId" name="id">
+                <input type="hidden" id="userId" name="user_id">
+                
                 <div class="form-section">
-                    <h3 class="form-title">Basic Information</h3>
+                    <h3 class="form-title">Booking Information</h3>
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Guest Name</label>
-                            <input type="text" class="form-control" value="Jon Doe">
-                        </div>
-                        <div class="form-group">
-                            <label>Room Type</label>
-                            <select class="form-control">
-                                <option>King</option>
-                                <option>Queen</option>
-                                <option>Twin</option>
-                            </select>
+                            <input type="text" id="guestName" class="form-control" readonly style="background-color: #f4f4f4; cursor: not-allowed;">
                         </div>
                         <div class="form-group">
                             <label>Room Number</label>
-                            <input type="text" class="form-control" value="100">
+                            <input type="text" id="roomNumber" name="room_number" class="form-control" placeholder="e.g. 101">
                         </div>
                         <div class="form-group">
-                            <label>Total Price</label>
-                            <input type="text" class="form-control" value="$ 500">
+                            <label>Total Price ($)</label>
+                            <input type="text" id="totalPrice" name="total_price" class="form-control">
                         </div>
                         <div class="form-group">
-                            <label>Check-In</label>
-                            <input type="datetime-local" class="form-control" value="2025-11-20T14:00">
+                            <label>Status</label>
+                            <select id="status" name="status" class="form-control">
+                                <option value="Pending">Pending</option>
+                                <option value="Paid">Paid</option>
+                                <option value="Cancelled">Cancelled</option>
+                                <option value="Failed">Failed</option>
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label>Check-Out</label>
-                            <input type="datetime-local" class="form-control" value="2025-11-20T11:00">
+                            <label>Check-In Date</label>
+                            <input type="text" id="checkIn" name="check_in" class="form-control" placeholder="YYYY-MM-DD">
+                        </div>
+                        <div class="form-group">
+                            <label>Check-Out Date</label>
+                            <input type="text" id="checkOut" name="check_out" class="form-control" placeholder="YYYY-MM-DD">
                         </div>
                     </div>
                 </div>
 
-                <!-- Service Info -->
-                <div class="form-section">
-                    <h3 class="form-title">Service Information</h3>
-                    <div class="checkbox-group">
-                        <label class="custom-checkbox">
-                            <input type="checkbox"> Room Service
-                        </label>
-                        <label class="custom-checkbox">
-                            <input type="checkbox"> Wake Up
-                        </label>
-                        <label class="custom-checkbox">
-                            <input type="checkbox" checked> Laundry
-                        </label>
-                        <label class="custom-checkbox">
-                            <input type="checkbox"> Heating
-                        </label>
-                        <label class="custom-checkbox">
-                            <input type="checkbox"> Vault
-                        </label>
-                    </div>
+                <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px;">
+                    <button type="button" onclick="updateBooking()" class="btn" style="background-color: #7b946f; border-color: #7b946f;">
+                        <i class="fa-regular fa-floppy-disk"></i> Save Changes
+                    </button>
+                    <button type="button" onclick="window.location.href='bookings-list.html'" class="btn" style="background-color: #dc3545; border-color: #dc3545;">
+                        Cancel
+                    </button>
                 </div>
-
-                <!-- Images (Booking Attachments / ID / Receipt) -->
-                <!-- Keeping consistent with screenshot which shows Room images -->
-                <div class="form-section">
-                    <h3 class="form-title">Images</h3>
-                    <div class="image-edit-grid">
-                        <div class="image-edit-item">
-                            <img src="images/room_suite.png" alt="ID Scan">
-                        </div>
-                        <div class="image-edit-item">
-                            <img src="images/room_standard.png" alt="Receipt">
-                        </div>
-                        <div class="image-edit-item">
-                            <img src="images/room_deluxe.png" alt="Receipt">
-                        </div>
-                        <div class="image-edit-item">
-                            <img src="images/room_suite.png" alt="Receipt">
-                        </div>
-
-                        <div class="add-image-btn">
-                            <span>+ Add an image</span>
-                        </div>
-                    </div>
-                    <button type="button" class="btn"
-                        style="margin-top: 20px; background-color: #7b946f; border-color: #7b946f;">+ Add an
-                        image</button>
-                </div>
-
-                <!-- Footer Actions -->
-                <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
-                    <button type="button" class="btn" style="background-color: #7b946f; border-color: #7b946f;"><i
-                            class="fa-regular fa-floppy-disk"></i> Save Changes</button>
-                    <button type="button" class="btn" style="background-color: #dc3545; border-color: #dc3545;"><i
-                            class="fa-regular fa-trash-can"></i> Cancel Booking</button>
-                </div>
-
             </form>
         </main>
     </div>
 
-</body>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
 
+            if (id) {
+                document.getElementById('booking-id-display').innerText = id;
+                document.getElementById('bookingId').value = id;
+                loadBookingData(id);
+            } else {
+                alert("No booking ID found in URL.");
+            }
+        });
+
+        /**
+         * 1. Load Data into Form
+         */
+        function loadBookingData(id) {
+            fetch('api/bookings') 
+                .then(res => res.json())
+                .then(data => {
+                    const booking = data.find(b => b.id == id);
+                    if (booking) {
+                        // Store IDs
+                        document.getElementById('bookingId').value = booking.id;
+                        document.getElementById('userId').value = booking.user_id;
+                        
+                        // Populate visible fields
+                        // If your API provides guest_name use it, otherwise use ID
+                        document.getElementById('guestName').value = booking.guest_name || "User ID: " + booking.user_id;
+                        document.getElementById('roomNumber').value = booking.room_number;
+                        document.getElementById('totalPrice').value = booking.total_price;
+                        document.getElementById('checkIn').value = booking.check_in;
+                        document.getElementById('checkOut').value = booking.check_out;
+                        document.getElementById('status').value = booking.status;
+                    } else {
+                        alert("Booking not found.");
+                    }
+                })
+                .catch(err => console.error("Error fetching booking details:", err));
+        }
+
+        /**
+         * 2. Send Update to Servlet
+         */
+        function updateBooking() {
+            const id = document.getElementById('bookingId').value;
+            const userId = document.getElementById('userId').value;
+            const roomNum = document.getElementById('roomNumber').value;
+            const price = document.getElementById('totalPrice').value.replace('$', '').trim();
+            const status = document.getElementById('status').value;
+            const checkIn = document.getElementById('checkIn').value;
+            const checkOut = document.getElementById('checkOut').value;
+
+            // Build Query String for the Servlet
+            const params = new URLSearchParams({
+                id: id,
+                user_id: userId,
+                room_number: roomNum,
+                total_price: price,
+                status: status,
+                check_in: checkIn,
+                check_out: checkOut
+            });
+
+            console.log("Updating with params:", params.toString());
+
+            fetch(`api/bookings/update?${params.toString()}`)
+                .then(res => {
+                    if (res.ok) {
+                        alert("Booking updated successfully!");
+                        window.location.href = 'bookings-list.html';
+                    } else {
+                        res.text().then(text => alert("Update failed: " + text));
+                    }
+                })
+                .catch(err => {
+                    console.error("Update request error:", err);
+                    alert("A network error occurred.");
+                });
+        }
+    </script>
+</body>
 </html>
